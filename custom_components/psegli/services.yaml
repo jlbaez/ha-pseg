@@ -1,0 +1,14 @@
+update_statistics:
+  name: "Update PSEG Statistics"
+  description: "Update statistics table with fresh PSEG data using correct timestamps"
+  fields:
+    days_back:
+      name: "Days Back"
+      description: "Number of days of historical data to fetch (0 = latest only, 30 = 1 month backfill)"
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 365
+          step: 1 

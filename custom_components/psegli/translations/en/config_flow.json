@@ -1,0 +1,19 @@
+{
+  "step": {
+    "user": {
+      "title": "PSEG Long Island",
+      "description": "Enter your PSEG authentication cookie to connect to your account. You can paste the cookie directly or reference it from secrets.yaml (e.g., !secret psegli_cookie).",
+      "data": {
+        "cookie": "Authentication Cookie"
+      }
+    }
+  },
+  "error": {
+    "invalid_auth": "Invalid authentication. Please check your cookie and try again.",
+    "secret_not_found": "Secret not found in secrets.yaml. Please check the secret name and try again.",
+    "unknown": "Unexpected error occurred."
+  },
+  "abort": {
+    "already_configured": "Device is already configured."
+  }
+}

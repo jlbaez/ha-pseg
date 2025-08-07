@@ -29,13 +29,53 @@ class PSEGLIClient:
     def test_connection(self) -> bool:
         """Test the connection to PSEG."""
         try:
+            # First check if we can access the dashboard
             response = self.session.get("https://mysmartenergy.psegliny.com/Dashboard")
             response.raise_for_status()
             
             # Check if we're redirected to login page
             if "login" in response.url.lower() or "signin" in response.url.lower():
-                _LOGGER.error("Cookie rejected - redirected to login page")
-                raise InvalidAuth("Cookie rejected - redirected to login page")
+                _LOGGER.error("Cookie expired - redirected to login page")
+                raise InvalidAuth(
+                    "Cookie expired - To get a new cookie:\n"
+                    "1. Open Chrome/Firefox Developer Tools (F12)\n"
+                    "2. Go to Network tab\n"
+                    "3. Visit https://mysmartenergy.psegliny.com\n"
+                    "4. Log in to your account\n"
+                    "5. Find any request to mysmartenergy.psegliny.com\n"
+                    "6. Copy the Cookie header value\n"
+                    "7. Go to Home Assistant > Settings > Integrations > PSEG Long Island > Configure\n"
+                    "8. Paste the new cookie"
+                )
+            
+            # Now check if we can get widget data
+            test_response = self.session.get(
+                "https://mysmartenergy.psegliny.com/Widget/LoadWidgets?Region=Usage"
+            )
+            test_response.raise_for_status()
+            
+            # Check if the response looks like HTML (indicating login redirect)
+            if "<html" in test_response.text.lower():
+                _LOGGER.error("Cookie expired - API returning HTML instead of JSON")
+                raise InvalidAuth(
+                    "Cookie expired - To get a new cookie:\n"
+                    "1. Open Chrome/Firefox Developer Tools (F12)\n"
+                    "2. Go to Network tab\n"
+                    "3. Visit https://mysmartenergy.psegliny.com\n"
+                    "4. Log in to your account\n"
+                    "5. Find any request to mysmartenergy.psegliny.com\n"
+                    "6. Copy the Cookie header value\n"
+                    "7. Go to Home Assistant > Settings > Integrations > PSEG Long Island > Configure\n"
+                    "8. Paste the new cookie"
+                )
+            
+            # Only try to parse JSON if we didn't get HTML
+            try:
+                json.loads(test_response.text)
+            except json.JSONDecodeError as err:
+                _LOGGER.error("Failed to parse API response: %s", err)
+                _LOGGER.debug("Response content: %s", test_response.text[:200])  # Log first 200 chars
+                raise InvalidAuth("Invalid API response - cookie may be expired") from err
             
             _LOGGER.info("PSEG connection test successful")
             return True

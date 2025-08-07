@@ -46,6 +46,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = PSEGCoordinator(hass, entry, client)
     entry.runtime_data = coordinator
     
+    # Listen for config changes (when user updates cookie via options)
+    entry.async_on_unload(entry.add_update_listener(async_update_options))
+    
     # Set up automatic updates (like Opower)
     async def async_update_statistics_automatic() -> None:
         """Automatically update statistics with latest PSEG data."""
@@ -143,7 +146,7 @@ class PSEGCoordinator(DataUpdateCoordinator):
                     "create",
                     {
                         "title": "PSEG Integration: Authentication Failed",
-                        "message": f"Your PSEG cookie has expired. Please update your cookie in the integration configuration.\n\nError: {e}",
+                        "message": f"Your PSEG cookie has expired. Please go to Settings > Integrations > PSEG Long Island > Configure to update your cookie.\n\nError: {e}",
                         "notification_id": "psegli_auth_failed",
                     },
                 )
@@ -299,6 +302,13 @@ async def _process_chart_data(hass: HomeAssistant, chart_data: dict[str, Any]) -
         except Exception as e:
             _LOGGER.error("Error processing series %s: %s", series_name, e)
             continue
+
+
+async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Update options for PSEG Long Island."""
+    # Reload the config entry when options change (when user updates cookie)
+    await hass.config_entries.async_reload(entry.entry_id)
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""

@@ -77,6 +77,18 @@ The integration creates the following statistics entries (visible in the Energy 
 
 **Note**: These are statistics entries, not sensors. They appear in the Energy Dashboard configuration and show historical data with proper timestamps.
 
+## Updating Your Cookie
+
+When your cookie expires (you'll get a notification in Home Assistant), you can easily update it:
+
+1. Go to **Settings** → **Devices & Services**
+2. Find **PSEG Long Island** integration
+3. Click **Configure**
+4. Enter your new cookie (follow the same steps as initial setup to get a fresh cookie)
+5. Click **Submit**
+
+The integration will automatically reload with the new cookie and clear any expiration notifications.
+
 ## Services
 
 ### `psegli.update_statistics`

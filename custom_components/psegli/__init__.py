@@ -134,6 +134,21 @@ class PSEGCoordinator(DataUpdateCoordinator):
                 
             return historical_data
                 
+        except InvalidAuth as e:
+            _LOGGER.error("Authentication failed during coordinator update: %s", e)
+            # Create a persistent notification to alert the user
+            await self.hass.async_create_task(
+                self.hass.services.async_call(
+                    "persistent_notification",
+                    "create",
+                    {
+                        "title": "PSEG Integration: Authentication Failed",
+                        "message": f"Your PSEG cookie has expired. Please update your cookie in the integration configuration.\n\nError: {e}",
+                        "notification_id": "psegli_auth_failed",
+                    },
+                )
+            )
+            raise UpdateFailed(f"Authentication failed: {e}")
         except Exception as e:
             _LOGGER.error("Failed to update PSEG data: %s", e)
             raise UpdateFailed(f"Failed to update PSEG data: {e}")

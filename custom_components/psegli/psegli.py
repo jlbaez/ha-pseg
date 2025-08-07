@@ -46,6 +46,8 @@ class PSEGLIClient:
     def get_usage_data(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, days_back: int = 0) -> Dict[str, Any]:
         """Get usage data from PSEG."""
         try:
+            # First check if our cookie is still valid
+            self.test_connection()
             # Calculate date range based on days_back parameter
             if days_back == 0:
                 # Yesterday to today (accounting for data lag)
@@ -112,7 +114,9 @@ class PSEGLIClient:
             raise InvalidAuth("Failed to get usage data") from err
         except json.JSONDecodeError as err:
             _LOGGER.error("Failed to parse JSON response: %s", err)
-            raise InvalidAuth("Invalid response format") from err
+            # This usually indicates an expired cookie (server returns HTML login page instead of JSON)
+            _LOGGER.error("This error typically indicates an expired authentication cookie. Please update your cookie in the PSEG integration configuration.")
+            raise InvalidAuth("Authentication cookie has expired - please update your cookie") from err
 
     def _parse_data(self, widget_data: Dict[str, Any], chart_data: Dict[str, Any]) -> Dict[str, Any]:
         """Parse the widget and chart data."""

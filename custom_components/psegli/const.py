@@ -8,7 +8,12 @@ DEFAULT_SCAN_INTERVAL = 300  # 5 minutes
 
 # Configuration
 CONF_COOKIE = "cookie"
-CONF_COOKIE_SECRET = "cookie_secret"
+CONF_USERNAME = "username"
+CONF_PASSWORD = "password"
+
+# Addon configuration
+CONF_ADDON_URL = "addon_url"
+DEFAULT_ADDON_URL = "http://localhost:8000"
 
 # Sensor names
 SENSOR_TOTAL_ENERGY = "total_energy"

@@ -3,6 +3,8 @@ import json
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, Optional, List
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from bs4 import BeautifulSoup
@@ -22,60 +24,31 @@ class PSEGLIClient:
         self.session = requests.Session()
         self.session.headers.update({
             "Cookie": cookie,
-            "Referer": "https://id.myaccount.psegliny.com/",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            "Referer": "https://mysmartenergy.psegliny.com/Dashboard",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "en-US,en;q=0.8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Ch-Ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Brave";v="138"',
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": '"macOS"',
+            "Sec-Gpc": "1"
         })
 
-    def test_connection(self) -> bool:
-        """Test the connection to PSEG."""
+    def _test_connection_sync(self) -> bool:
+        """Test the connection to PSEG (synchronous)."""
         try:
-            # First check if we can access the dashboard
             response = self.session.get("https://mysmartenergy.psegliny.com/Dashboard")
             response.raise_for_status()
             
             # Check if we're redirected to login page
             if "login" in response.url.lower() or "signin" in response.url.lower():
-                _LOGGER.error("Cookie expired - redirected to login page")
-                raise InvalidAuth(
-                    "Cookie expired - To get a new cookie:\n"
-                    "1. Open Chrome/Firefox Developer Tools (F12)\n"
-                    "2. Go to Network tab\n"
-                    "3. Visit https://mysmartenergy.psegliny.com\n"
-                    "4. Log in to your account\n"
-                    "5. Find any request to mysmartenergy.psegliny.com\n"
-                    "6. Copy the Cookie header value\n"
-                    "7. Go to Home Assistant > Settings > Integrations > PSEG Long Island > Configure\n"
-                    "8. Paste the new cookie"
-                )
-            
-            # Now check if we can get widget data
-            test_response = self.session.get(
-                "https://mysmartenergy.psegliny.com/Widget/LoadWidgets?Region=Usage"
-            )
-            test_response.raise_for_status()
-            
-            # Check if the response looks like HTML (indicating login redirect)
-            if "<html" in test_response.text.lower():
-                _LOGGER.error("Cookie expired - API returning HTML instead of JSON")
-                raise InvalidAuth(
-                    "Cookie expired - To get a new cookie:\n"
-                    "1. Open Chrome/Firefox Developer Tools (F12)\n"
-                    "2. Go to Network tab\n"
-                    "3. Visit https://mysmartenergy.psegliny.com\n"
-                    "4. Log in to your account\n"
-                    "5. Find any request to mysmartenergy.psegliny.com\n"
-                    "6. Copy the Cookie header value\n"
-                    "7. Go to Home Assistant > Settings > Integrations > PSEG Long Island > Configure\n"
-                    "8. Paste the new cookie"
-                )
-            
-            # Only try to parse JSON if we didn't get HTML
-            try:
-                json.loads(test_response.text)
-            except json.JSONDecodeError as err:
-                _LOGGER.error("Failed to parse API response: %s", err)
-                _LOGGER.debug("Response content: %s", test_response.text[:200])  # Log first 200 chars
-                raise InvalidAuth("Invalid API response - cookie may be expired") from err
+                _LOGGER.error("Cookie rejected - redirected to login page")
+                raise InvalidAuth("Cookie rejected - redirected to login page")
             
             _LOGGER.info("PSEG connection test successful")
             return True
@@ -83,11 +56,18 @@ class PSEGLIClient:
             _LOGGER.error("Failed to connect to PSEG: %s", err)
             raise InvalidAuth("Invalid authentication") from err
 
-    def get_usage_data(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, days_back: int = 0) -> Dict[str, Any]:
-        """Get usage data from PSEG."""
+    async def test_connection(self) -> bool:
+        """Test the connection to PSEG (async wrapper)."""
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            return await loop.run_in_executor(executor, self._test_connection_sync)
+
+    def _get_usage_data_sync(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, days_back: int = 0) -> Dict[str, Any]:
+        """Get usage data from PSEG (synchronous)."""
         try:
             # First check if our cookie is still valid
-            self.test_connection()
+            self._test_connection_sync()
+            
             # Calculate date range based on days_back parameter
             if days_back == 0:
                 # Yesterday to today (accounting for data lag)
@@ -98,17 +78,29 @@ class PSEGLIClient:
                 end_date = datetime.now()
                 start_date = end_date - timedelta(days=days_back)
             
-            # Get widget data
-            widget_response = self.session.get(
-                "https://mysmartenergy.psegliny.com/Widget/LoadWidgets?Region=Usage"
-            )
-            widget_response.raise_for_status()
-            widget_data = json.loads(widget_response.text)
-
-            # First, make the Chart/ request to set up the session context and granularity
+            _LOGGER.info("Date calculation: days_back=%d, start_date=%s, end_date=%s", 
+                        days_back, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+            
+            # First, get the RequestVerificationToken from the Dashboard page
+            _LOGGER.info("Getting RequestVerificationToken from Dashboard page...")
+            dashboard_response = self.session.get("https://mysmartenergy.psegliny.com/Dashboard")
+            if dashboard_response.status_code != 200:
+                raise InvalidAuth("Failed to get Dashboard page")
+            
+            # Extract the token from the page
+            import re
+            token_match = re.search(r'name="__RequestVerificationToken" type="hidden" value="([^"]+)"', dashboard_response.text)
+            if token_match:
+                request_token = token_match.group(1)
+                _LOGGER.debug("Found RequestVerificationToken: %s...", request_token[:20])
+            else:
+                _LOGGER.warning("Could not find RequestVerificationToken, using empty string")
+                request_token = ""
+            
+            # Then, make the Chart/ request to set up the session context and granularity
             chart_setup_url = "https://mysmartenergy.psegliny.com/Dashboard/Chart"
             chart_setup_data = {
-                "__RequestVerificationToken": self._get_request_verification_token(),
+                "__RequestVerificationToken": request_token,  # Use the actual token from the page
                 "UsageInterval": "5",  # 5 = Hourly granularity
                 "UsageType": "1",
                 "jsTargetName": "StorageType",
@@ -118,7 +110,7 @@ class PSEGLIClient:
                 "IsRangeOpen": "False",
                 "MaintainMaxDate": "true",
                 "SelectedViaDateRange": "False",
-                "meterIds": ["1501890_0_\"\"_1_1_\"Off-Peak\"_2086517_Delivered", "1501890_0_\"\"_1_1_\"On-Peak\"_2086517_Delivered"],
+                #"meterIds": ["1501890_0_\"\"_1_1_\"Off-Peak\"_2086517_Delivered", "1501890_0_\"\"_1_1_\"On-Peak\"_2086517_Delivered"],
                 "ChartComparison": "1",
                 "ChartComparison2": "0",
                 "ChartComparison3": "0",
@@ -127,8 +119,23 @@ class PSEGLIClient:
             
             _LOGGER.info("Making Chart/ setup request with hourly granularity (days_back: %d, start: %s, end: %s)", 
                         days_back, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+            _LOGGER.debug("Chart setup data: %s", chart_setup_data)
+            
             chart_setup_response = self.session.post(chart_setup_url, data=chart_setup_data)
             chart_setup_response.raise_for_status()
+            
+            # Check for redirect response in Chart/ request - if it redirects, the request failed
+            try:
+                chart_setup_json = json.loads(chart_setup_response.text)
+                if "AjaxResults" in chart_setup_json and chart_setup_json["AjaxResults"]:
+                    for result in chart_setup_json["AjaxResults"]:
+                        if result.get("Action") == "Redirect":
+                            _LOGGER.error("Chart setup request FAILED - redirected to: %s", result.get('Value'))
+                            _LOGGER.error("This means the hourly context was not set - cannot proceed to get hourly data")
+                            raise InvalidAuth("Chart setup request failed - hourly context not established")
+            except json.JSONDecodeError:
+                _LOGGER.error("Chart setup response is not JSON - request failed")
+                raise InvalidAuth("Chart setup response is not JSON - request failed")
 
             # Then, make the ChartData/ request to get the actual data
             chart_data_url = "https://mysmartenergy.psegliny.com/Dashboard/ChartData"
@@ -146,6 +153,9 @@ class PSEGLIClient:
             _LOGGER.debug("ChartData response content (first 500 chars): %s", chart_response.text[:500])
             
             chart_data = json.loads(chart_response.text)
+            
+            # Create a minimal widget data structure since we're not fetching it
+            widget_data = {"AjaxResults": []}
 
             return self._parse_data(widget_data, chart_data)
 
@@ -157,6 +167,12 @@ class PSEGLIClient:
             # This usually indicates an expired cookie (server returns HTML login page instead of JSON)
             _LOGGER.error("This error typically indicates an expired authentication cookie. Please update your cookie in the PSEG integration configuration.")
             raise InvalidAuth("Authentication cookie has expired - please update your cookie") from err
+
+    async def get_usage_data(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, days_back: int = 0) -> Dict[str, Any]:
+        """Get usage data from PSEG (async wrapper)."""
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as executor:
+            return await loop.run_in_executor(executor, self._get_usage_data_sync, start_date, end_date, days_back)
 
     def _parse_data(self, widget_data: Dict[str, Any], chart_data: Dict[str, Any]) -> Dict[str, Any]:
         """Parse the widget and chart data."""
@@ -254,27 +270,4 @@ class PSEGLIClient:
 
         return result 
 
-    def _get_request_verification_token(self) -> str:
-        """Get the request verification token from the main page."""
-        try:
-            response = self.session.get("https://mysmartenergy.psegliny.com/Dashboard")
-            response.raise_for_status()
-            
-            _LOGGER.debug("Dashboard response status: %s", response.status_code)
-            _LOGGER.debug("Dashboard response URL: %s", response.url)
-            
-            # Parse the HTML to find the verification token
-            soup = BeautifulSoup(response.text, "html.parser")
-            token_input = soup.find("input", {"name": "__RequestVerificationToken"})
-            
-            if token_input and token_input.get("value"):
-                token = token_input["value"]
-                _LOGGER.debug("Found request verification token: %s", token[:20] + "..." if len(token) > 20 else token)
-                return token
-            else:
-                _LOGGER.warning("Could not find request verification token, using empty string")
-                return ""
-                
-        except Exception as e:
-            _LOGGER.error("Failed to get request verification token: %s", e)
-            return "" 
+ 

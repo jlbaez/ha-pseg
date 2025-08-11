@@ -54,13 +54,17 @@ async def get_fresh_cookies(username: str, password: str) -> Optional[str]:
                 "password": password
             }
             
+            logger.info("Sending login request to addon with timeout=120s...")
+            
             async with session.post(
                 "http://localhost:8000/login",
                 json=login_data,
-                timeout=60  # Longer timeout for login process
+                timeout=120  # Extended timeout to match addon processing time
             ) as resp:
+                logger.info(f"Addon response received: status={resp.status}")
                 if resp.status == 200:
                     result = await resp.json()
+                    logger.info(f"Addon response: {result}")
                     if result.get("success") and result.get("cookies"):
                         logger.info("Successfully obtained cookies from addon")
                         return result["cookies"]

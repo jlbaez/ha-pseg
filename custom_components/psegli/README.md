@@ -80,6 +80,23 @@ data:
   days_back: 7
 ```
 
+### `psegli.refresh_cookie`
+
+Manually refresh the PSEG authentication cookie using the addon. Useful when you know your cookie has expired or you want to ensure fresh authentication.
+
+**Service Data:**
+
+No parameters required.
+
+**Example:**
+
+```yaml
+# Refresh the authentication cookie
+service: psegli.refresh_cookie
+```
+
+**Note:** This service requires the PSEG Long Island Automation Addon to be installed and running. If the addon is not available, you'll need to manually update your cookie in the integration settings.
+
 ## Data Structure
 
 The integration provides the following data:

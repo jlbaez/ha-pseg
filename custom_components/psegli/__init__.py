@@ -137,6 +137,100 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_update_statistics_manual
     )
     
+    # Register the cookie refresh service
+    async def async_refresh_cookie(call: Any) -> None:
+        """Manually refresh the PSEG authentication cookie."""
+        _LOGGER.info("Manual cookie refresh service called")
+        
+        try:
+            username = entry.data.get(CONF_USERNAME)
+            password = entry.data.get(CONF_PASSWORD)
+            
+            if not username or not password:
+                _LOGGER.error("No credentials available for cookie refresh")
+                return
+            
+            _LOGGER.info("Attempting to refresh cookie via addon...")
+            
+            # Check if addon is healthy before attempting refresh
+            from .auto_login import check_addon_health
+            if not await check_addon_health():
+                _LOGGER.error("Addon not available or unhealthy, cannot refresh cookie")
+                return
+            
+            # Attempt to get fresh cookies
+            from .auto_login import get_fresh_cookies
+            cookies = await get_fresh_cookies(username, password)
+            
+            if cookies:
+                # Cookies are already in string format from addon
+                cookie_string = cookies
+                
+                # Update the client with new cookie
+                client.cookie = cookie_string
+                client.session.headers.update({"Cookie": cookie_string})
+                
+                # Update the config entry
+                hass.config_entries.async_update_entry(
+                    entry,
+                    data={**entry.data, CONF_COOKIE: cookie_string},
+                )
+                
+                _LOGGER.info("Successfully refreshed cookie via addon")
+                
+                # Test the new cookie
+                await client.test_connection()
+                _LOGGER.info("New cookie validation successful")
+                
+                # Create a success notification
+                await hass.async_create_task(
+                    hass.services.async_call(
+                        "persistent_notification",
+                        "create",
+                        {
+                            "title": "PSEG Integration: Cookie Refreshed",
+                            "message": "Successfully refreshed your PSEG authentication cookie. The integration should now work properly.",
+                            "notification_id": "psegli_cookie_refreshed",
+                        },
+                    )
+                )
+                
+            else:
+                _LOGGER.error("Addon failed to provide fresh cookies")
+                # Create an error notification
+                await hass.async_create_task(
+                    hass.services.async_call(
+                        "persistent_notification",
+                        "create",
+                        {
+                            "title": "PSEG Integration: Cookie Refresh Failed",
+                            "message": "Failed to refresh your PSEG authentication cookie. Please check the addon status or provide a cookie manually.",
+                            "notification_id": "psegli_cookie_refresh_failed",
+                        },
+                    )
+                )
+                
+        except Exception as e:
+            _LOGGER.error("Failed to refresh cookie: %s", e)
+            # Create an error notification
+            await hass.async_create_task(
+                hass.services.async_call(
+                    "persistent_notification",
+                    "create",
+                    {
+                        "title": "PSEG Integration: Cookie Refresh Error",
+                        "message": f"Error refreshing your PSEG authentication cookie: {e}",
+                        "notification_id": "psegli_cookie_refresh_error",
+                    },
+                )
+            )
+    
+    hass.services.async_register(
+        DOMAIN,
+        "refresh_cookie",
+        async_refresh_cookie
+    )
+    
     return True
 
 class PSEGCoordinator(DataUpdateCoordinator):
@@ -445,7 +539,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if entry.runtime_data:
         await entry.runtime_data.async_shutdown()
     
-    # Remove the service
+    # Remove the services
     hass.services.async_remove(DOMAIN, "update_statistics")
+    hass.services.async_remove(DOMAIN, "refresh_cookie")
     
     return True 

@@ -11,4 +11,9 @@ update_statistics:
         number:
           min: 0
           max: 365
-          step: 1 
+          step: 1
+
+refresh_cookie:
+  name: "Refresh PSEG Cookie"
+  description: "Manually refresh the PSEG authentication cookie using the addon"
+  fields: {} 

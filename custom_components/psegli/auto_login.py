@@ -36,7 +36,7 @@ async def check_addon_health() -> bool:
         logger.debug(f"Error checking addon health: {e}")
         return False
 
-async def get_fresh_cookies(username: str, password: str) -> Optional[Dict[str, str]]:
+async def get_fresh_cookies(username: str, password: str) -> Optional[str]:
     """Get fresh cookies using the automation addon."""
     try:
         logger.info("Requesting fresh cookies from PSEG automation addon...")

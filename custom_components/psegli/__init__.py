@@ -43,14 +43,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             cookies = await get_fresh_cookies(username, password)
             
             if cookies:
-                # Convert cookies to cookie string
-                cookie = "; ".join([f"{name}={value}" for name, value in cookies.items()])
+                # Cookies are already in string format from addon
+                cookie_string = cookies
                 _LOGGER.info("Successfully obtained fresh cookies from addon")
                 
                 # Store cookie in config entry for future use
                 hass.config_entries.async_update_entry(
                     entry,
-                    data={**entry.data, CONF_COOKIE: cookie},
+                    data={**entry.data, CONF_COOKIE: cookie_string},
                 )
             else:
                 _LOGGER.warning("Addon not available or failed to get cookies")

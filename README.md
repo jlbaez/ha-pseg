@@ -167,6 +167,10 @@ The addon provides these endpoints:
 
 ## 📝 **Changelog**
 
+### **v2.1.1**
+
+- Add-On logic updates
+
 ### **v2.1.0**
 
 - Fully functional integration with optional Add-On

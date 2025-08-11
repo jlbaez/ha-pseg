@@ -48,8 +48,8 @@ class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         cookies = await get_fresh_cookies(username, password)
                         
                         if cookies:
-                            # Convert cookies to cookie string
-                            cookie = "; ".join([f"{name}={value}" for name, value in cookies.items()])
+                            # Cookies are already in string format from addon
+                            cookie_string = cookies
                             _LOGGER.info("Successfully obtained fresh cookies from addon")
                         else:
                             _LOGGER.warning("Addon not available or failed to get cookies")
@@ -146,8 +146,8 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                         cookies = await get_fresh_cookies(username, password)
                         
                         if cookies:
-                            # Convert cookies to cookie string
-                            cookie_string = "; ".join([f"{name}={value}" for name, value in cookies.items()])
+                            # Cookies are already in string format from addon
+                            cookie_string = cookies
                             
                             # Validate the cookie
                             client = PSEGLIClient(cookie_string)

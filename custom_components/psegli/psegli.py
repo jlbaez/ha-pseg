@@ -110,7 +110,6 @@ class PSEGLIClient:
                 "IsRangeOpen": "False",
                 "MaintainMaxDate": "true",
                 "SelectedViaDateRange": "False",
-                #"meterIds": ["1501890_0_\"\"_1_1_\"Off-Peak\"_2086517_Delivered", "1501890_0_\"\"_1_1_\"On-Peak\"_2086517_Delivered"],
                 "ChartComparison": "1",
                 "ChartComparison2": "0",
                 "ChartComparison3": "0",

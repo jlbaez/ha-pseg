@@ -71,16 +71,20 @@ The integration configuration is simple - just enter your PSEG credentials:
 
 - **Username/Email**: Your PSEG account email address
 - **Password**: Your PSEG account password
+- **Cookie**: A working Cookie from a manual login to https://mysmartenergy.psegliny.com/Dashboard
 
 ### **Automatic Operation**
 
 Once configured, the integration will:
 
+- Fetch energy usage data every 5 minutes
+- Update Home Assistant Energy Dashboard statistics
+
+With optional AddOn:
+
 - Automatically log in to PSEG using the addon
 - Handle reCAPTCHA challenges transparently
 - Maintain authentication cookies automatically
-- Fetch energy usage data every 5 minutes
-- Update Home Assistant Energy Dashboard statistics
 
 ## 🎯 **Features**
 

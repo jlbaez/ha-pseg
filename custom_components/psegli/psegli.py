@@ -224,6 +224,7 @@ class PSEGLIClient:
                 valid_points = []
                 for i, point in enumerate(data_points):
                     if isinstance(point, dict) and "x" in point and "y" in point:
+                        # Object format: hourly data with proper structure
                         timestamp = point["x"] / 1000
                         value = point["y"]
                         if value is not None:
@@ -237,18 +238,10 @@ class PSEGLIClient:
                             })
                             _LOGGER.debug("Point %d: timestamp=%s, value=%s", i, local_time, value)
                     elif isinstance(point, list) and len(point) >= 2:
-                        timestamp = point[0] / 1000
-                        value = point[1]
-                        if value is not None:
-                            # Timestamps need to be shifted by +4 hours to align with actual peak hours
-                            # Raw timestamp shows 11:00 AM but should be 3:00 PM for peak hours
-                            shifted_timestamp = timestamp + (4 * 3600)  # Add 4 hours
-                            local_time = datetime.fromtimestamp(shifted_timestamp)
-                            valid_points.append({
-                                "timestamp": local_time,
-                                "value": value
-                            })
-                            _LOGGER.debug("Point %d: timestamp=%s, value=%s", i, local_time, value)
+                        # Array format: appears to be daily summaries, not hourly data
+                        # Skip this format when we're looking for hourly consumption data
+                        _LOGGER.debug("Skipping array format point %d (daily summary): %s", i, point)
+                        continue
                 
                 if valid_points:
                     latest_point = max(valid_points, key=lambda x: x["timestamp"])

@@ -301,16 +301,45 @@ async def _process_chart_data(hass: HomeAssistant, chart_data: dict[str, Any]) -
             statistics = []
             cumulative_total = 0.0
             
+            _LOGGER.info("Starting statistics processing for %s with %d points", series_name, len(valid_points))
+            _LOGGER.debug("First 3 points: %s", valid_points[:3] if valid_points else "None")
+            
             try:
                 for i, point in enumerate(valid_points):
                     try:
-                        _LOGGER.debug("Processing point %d: type=%s, value=%s", i, type(point), point)
-                        
                         if isinstance(point, dict) and "timestamp" in point and "value" in point:
                             timestamp = point["timestamp"]
                             value = point["value"]
                             
-                            _LOGGER.debug("Point %d: timestamp=%s, value=%s", i, timestamp, value)
+                            _LOGGER.debug("Processing point %d: timestamp=%s, value=%s (type: %s)", i, timestamp, value, type(value))
+                            
+                            # Check for problematic values before conversion
+                            if value is None:
+                                _LOGGER.warning("Point %d: value is None, skipping", i)
+                                continue
+                            
+                            if isinstance(value, str):
+                                _LOGGER.debug("Point %d: value is string: '%s'", i, value)
+                                if value.strip() == "":
+                                    _LOGGER.warning("Point %d: value is empty string, skipping", i)
+                                    continue
+                            
+                            # Try to convert to float with error handling
+                            try:
+                                raw_energy_value = float(value)
+                                _LOGGER.debug("Point %d: raw_energy_value=%.6f", i, raw_energy_value)
+                                
+                                # Check for extreme values that could cause overflow
+                                if abs(raw_energy_value) > 1e6:  # 1 million kWh
+                                    _LOGGER.warning("Point %d: extremely large value: %.6f", i, raw_energy_value)
+                                
+                                if raw_energy_value < 0:
+                                    _LOGGER.warning("Point %d: negative value: %.6f", i, raw_energy_value)
+                                
+                                energy_value = max(0.0, raw_energy_value)
+                            except (ValueError, TypeError) as e:
+                                _LOGGER.error("Point %d: failed to convert value '%s' to float: %s", i, value, e)
+                                continue
                             
                             # Ensure timestamp is at the top of the hour (Statistics API requirement)
                             # Round down to the nearest hour
@@ -326,12 +355,20 @@ async def _process_chart_data(hass: HomeAssistant, chart_data: dict[str, Any]) -
                             if start_time.tzinfo is None:
                                 start_time = local_tz.localize(start_time)
                             
-                            # For energy consumption, we need to ensure positive values
-                            # and proper formatting for Home Assistant's Statistics API
-                            energy_value = max(0.0, float(value))  # Ensure non-negative
-                            
-                            # For energy consumption, use both hourly value and cumulative total (like Opower)
+                            # For energy consumption, use both hourly value and cumulative totals (like Opower)
+                            old_cumulative = cumulative_total
                             cumulative_total += energy_value
+                            
+                            _LOGGER.debug("Point %d: energy_value=%.6f, cumulative_total: %.6f -> %.6f", 
+                                        i, energy_value, old_cumulative, cumulative_total)
+                            
+                            # Check for cumulative total issues
+                            if cumulative_total < 0:
+                                _LOGGER.error("Point %d: cumulative_total became negative: %.6f (was %.6f, added %.6f)", 
+                                            i, cumulative_total, old_cumulative, energy_value)
+                            
+                            if abs(cumulative_total) > 1e6:  # 1 million kWh
+                                _LOGGER.warning("Point %d: cumulative_total extremely large: %.6f", i, cumulative_total)
                             
                             # Statistics API expects specific format for energy consumption (like Opower)
                             statistics.append({

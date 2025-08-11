@@ -167,6 +167,10 @@ The addon provides these endpoints:
 
 ## 📝 **Changelog**
 
+### **v2.1.0**
+
+- Fully functional integration with optional Add-On
+
 ### **v2.0.0**
 
 - **Major Architecture Change**: Now uses Home Assistant addon for automation

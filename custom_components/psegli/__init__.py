@@ -166,9 +166,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 # Cookies are already in string format from addon
                 cookie_string = cookies
                 
+                # Get the actual client instance from hass.data
+                current_client = hass.data[DOMAIN][entry.entry_id]
+                
                 # Update the client with new cookie
-                client.cookie = cookie_string
-                client.session.headers.update({"Cookie": cookie_string})
+                current_client.cookie = cookie_string
+                current_client.session.headers.update({"Cookie": cookie_string})
+                
+                _LOGGER.info("✅ Updated client cookie: %s", cookie_string[:50] + "..." if len(cookie_string) > 50 else cookie_string)
+                _LOGGER.info("✅ Updated client session headers")
                 
                 # Update the config entry
                 hass.config_entries.async_update_entry(
@@ -176,6 +182,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     data={**entry.data, CONF_COOKIE: cookie_string},
                 )
                 
+                _LOGGER.info("✅ Updated config entry with new cookie")
                 _LOGGER.info("Successfully refreshed cookie via addon")
                 
                 # Test the new cookie

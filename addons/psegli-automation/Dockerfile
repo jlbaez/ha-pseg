@@ -1,14 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Playwright and browsers
 RUN pip install playwright==1.54.0
 RUN playwright install chromium
+
+# Install browser dependencies using Playwright's reliable method
 RUN playwright install-deps
 
 # Set working directory

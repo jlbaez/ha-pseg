@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
-from auto_login import PSEGAutoLogin
+from auto_login import get_fresh_cookies
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,11 +37,8 @@ async def login(request: LoginRequest):
     try:
         logger.info(f"Login attempt for user: {request.username}")
         
-        # Create auto-login instance
-        auto_login = PSEGAutoLogin(request.username, request.password)
-        
-        # Get fresh cookies - run sync code in thread pool
-        cookies = await asyncio.to_thread(auto_login.get_fresh_cookies)
+        # Get fresh cookies using the compatibility function
+        cookies = await get_fresh_cookies(request.username, request.password)
         
         if cookies:
             logger.info("Login successful, cookies obtained")

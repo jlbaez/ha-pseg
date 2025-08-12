@@ -56,8 +56,10 @@ pseg_*.json
 
 # Test scripts
 test_psegli_api_standalone.py
+test_cookie.txt
 test_psegli_complete.py
 test_playwright_real_click.py
+test_playwright_real_click_2.py
 test-requirements.txt
 
 # Testing

@@ -167,6 +167,10 @@ The addon provides these endpoints:
 
 ## 📝 **Changelog**
 
+### **v2.1.3**
+
+- Add-On retry improvements
+
 ### **v2.1.2**
 
 - Update Stealth version

@@ -39,6 +39,12 @@ class PSEGLIClient:
             "Sec-Gpc": "1"
         })
 
+    def update_cookie(self, new_cookie: str) -> None:
+        """Update the cookie in this client instance."""
+        self.cookie = new_cookie
+        self.session.headers.update({"Cookie": new_cookie})
+        _LOGGER.debug("Updated client cookie to: %s", new_cookie[:50] + "..." if len(new_cookie) > 50 else new_cookie)
+
     def _test_connection_sync(self) -> bool:
         """Test the connection to PSEG (synchronous)."""
         try:
@@ -226,20 +232,21 @@ class PSEGLIClient:
                         # Object format: hourly data with proper structure
                         timestamp = point["x"] / 1000
                         value = point["y"]
-                        if value is not None:
-                            # Timestamps need to be shifted by +4 hours to align with actual peak hours
-                            # Raw timestamp shows 11:00 AM but should be 3:00 PM for peak hours
-                            shifted_timestamp = timestamp + (4 * 3600)  # Add 4 hours
-                            local_time = datetime.fromtimestamp(shifted_timestamp)
-                            valid_points.append({
-                                "timestamp": local_time,
-                                "value": value
-                            })
-                            _LOGGER.debug("Point %d: timestamp=%s, value=%s", i, local_time, value)
+                        # Replace None values with 0 to ensure continuous data flow
+                        if value is None:
+                            value = 0
+                        # Timestamps need to be shifted by +4 hours to align with actual peak hours
+                        # Raw timestamp shows 11:00 AM but should be 3:00 PM for peak hours
+                        shifted_timestamp = timestamp + (4 * 3600)  # Add 4 hours
+                        local_time = datetime.fromtimestamp(shifted_timestamp)
+                        valid_points.append({
+                            "timestamp": local_time,
+                            "value": value
+                        })
+                        _LOGGER.debug("Point %d: timestamp=%s, value=%s", i, local_time, value)
                     elif isinstance(point, list) and len(point) >= 2:
                         # Array format: appears to be daily summaries, not hourly data
                         # Skip this format when we're looking for hourly consumption data
-                        _LOGGER.debug("Skipping array format point %d (daily summary): %s", i, point)
                         continue
                 
                 if valid_points:

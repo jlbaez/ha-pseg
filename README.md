@@ -167,6 +167,11 @@ The addon provides these endpoints:
 
 ## 📝 **Changelog**
 
+### **v2.2.0**
+
+- Refactored Add-On
+- Improved statistics calculation
+
 ### **v2.1.3**
 
 - Add-On retry improvements

@@ -1,13 +1,13 @@
 # PSEG Long Island Home Assistant Integration
 
-A Home Assistant integration for PSEG Long Island that provides automated energy usage data collection and statistics updates using a dedicated automation addon.
+A Home Assistant integration for PSEG NJ that provides automated energy usage data collection and statistics updates using a dedicated automation addon.
 
 ## 🚀 **Architecture Overview**
 
 This integration uses a **two-component approach**:
 
-1. **PSEG Long Island Automation Addon**: Handles automated login, reCAPTCHA bypass, and cookie management
-2. **PSEG Long Island Integration**: Lightweight component that fetches energy data using the addon's authentication
+1. **PSEG NJ Automation Addon**: Handles automated login, reCAPTCHA bypass, and cookie management
+2. **PSEG NJ Integration**: Lightweight component that fetches energy data using the addon's authentication
 
 ### **How It Works:**
 
@@ -36,7 +36,7 @@ This integration uses a **two-component approach**:
 
 2. **Install the addon:**
 
-   - Find **PSEG Long Island Automation** in the store
+   - Find **PSEG NJ Automation** in the store
    - Click **Install**
    - Wait for installation to complete
    - Click **Start**
@@ -71,7 +71,7 @@ The integration configuration is simple - just enter your PSEG credentials:
 
 - **Username/Email**: Your PSEG account email address
 - **Password**: Your PSEG account password
-- **Cookie**: A working Cookie from a manual login to https://mysmartenergy.psegliny.com/Dashboard
+- **Cookie**: A working Cookie from a manual login to https://mysmartenergy.nj.pseg.com/Dashboard
 
 ### **Automatic Operation**
 

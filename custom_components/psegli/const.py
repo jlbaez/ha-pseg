@@ -1,6 +1,6 @@
 """Constants for the PSEG Long Island integration."""
 
-DOMAIN = "psegli"
+DOMAIN = "nj.pseg"
 
 # Defaults
 DEFAULT_NAME = "PSEG Long Island"

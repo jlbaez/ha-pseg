@@ -9,6 +9,7 @@ import logging
 import random
 import time
 from typing import Optional, Dict, Any, List
+
 from playwright.async_api import async_playwright, Browser, Page, BrowserContext
 
 # Configure logging
@@ -35,13 +36,13 @@ class PSEGAutoLogin:
         
         # URLs for the realistic browsing flow
         self.brave_search_url = "https://search.brave.com/search?q=pseg+long+island&source=desktop"
-        self.pseg_main_url = "https://www.psegliny.com/"
-        self.login_page_url = "https://myaccount.psegliny.com/user/login"
-        self.id_domain = "https://id.myaccount.psegliny.com/"
-        self.dashboard_url = "https://myaccount.psegliny.com/dashboards"
-        self.exceptional_dashboard = "https://myaccount.psegliny.com/dashboards/exceptionaldashboard"
-        self.mysmartenergy_redirect = "https://myaccount.psegliny.com/LI/Header/RedirectMDMWidget"
-        self.final_dashboard = "https://mysmartenergy.psegliny.com/Dashboard"
+        self.pseg_main_url = "https://www.nj.pseg.com/"
+        self.login_page_url = "https://myaccount.nj.pseg.com/user/login"
+        self.id_domain = "https://id.myaccount.nj.pseg.com/"
+        self.dashboard_url = "https://myaccount.nj.pseg.com/dashboards"
+        self.exceptional_dashboard = "https://myaccount.nj.pseg.com/dashboards/exceptionaldashboard"
+        self.mysmartenergy_redirect = "https://myaccount.nj.pseg.com/LI/Header/RedirectMDMWidget"
+        self.final_dashboard = "https://mysmartenergy.nj.pseg.com/Dashboard"
     
     async def setup_browser(self) -> bool:
         """Initialize Playwright browser with stealth options."""
@@ -181,7 +182,7 @@ class PSEGAutoLogin:
         """Handle intercepted requests to capture cookies and exceptional dashboard data."""
         try:
             request = route.request
-            if "mysmartenergy.psegliny.com" in request.url:
+            if "mysmartenergy.nj.pseg.com" in request.url:
                 # Capture cookies from MySmartEnergy requests
                 if hasattr(request, 'headers') and 'cookie' in request.headers:
                     cookie_header = request.headers['cookie']
@@ -260,14 +261,14 @@ class PSEGAutoLogin:
             
             # Wait for login page to load
             try:
-                await self.page.wait_for_url(lambda url: "id.myaccount.psegliny.com" in url, timeout=15000)
+                await self.page.wait_for_url(lambda url: "id.myaccount.nj.pseg.com" in url, timeout=15000)
                 await self.page.wait_for_load_state('networkidle')
                 _LOGGER.info("✅ Login page loaded")
             except Exception as e:
                 _LOGGER.warning(f"⚠️ Login page navigation wait failed: {e}")
                 # Check current URL and continue if we're already on the right page
                 current_url = self.page.url
-                if "id.myaccount.psegliny.com" in current_url:
+                if "id.myaccount.nj.pseg.com" in current_url:
                     _LOGGER.info(f"✅ Already on login page: {current_url}")
                 else:
                     _LOGGER.error(f"❌ Not on expected login page: {current_url}")
@@ -318,13 +319,13 @@ class PSEGAutoLogin:
             
             try:
                 # Wait for redirect to dashboard
-                await self.page.wait_for_url(lambda url: "myaccount.psegliny.com/dashboards" in url, timeout=20000)
+                await self.page.wait_for_url(lambda url: "myaccount.nj.pseg.com/dashboards" in url, timeout=20000)
                 await self.page.wait_for_load_state('networkidle')
                 _LOGGER.info("✅ Dashboard loaded")
             except Exception as e:
                 # Check if we're still on the login page (login failed)
                 current_url = self.page.url
-                if "id.myaccount.psegliny.com/oauth2" in current_url:
+                if "id.myaccount.nj.pseg.com/oauth2" in current_url:
                     _LOGGER.error(f"❌ Login failed - still on login page: {current_url}")
                     return False
                 else:
@@ -370,7 +371,7 @@ class PSEGAutoLogin:
                     
                     # Get cookies from context for the request
                     context_cookies = await self.context.cookies()
-                    cookie_string = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in context_cookies if cookie['domain'] in ['.psegliny.com', '.myaccount.psegliny.com']])
+                    cookie_string = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in context_cookies if cookie['domain'] in ['.nj.pseg.com', '.myaccount.nj.pseg.com']])
                     
                     if cookie_string:
                         important_headers['cookie'] = cookie_string
@@ -405,7 +406,7 @@ class PSEGAutoLogin:
             # Wait for MySmartEnergy dashboard - use more robust navigation approach
             try:
                 # First try to wait for the URL change
-                await self.page.wait_for_url(lambda url: "mysmartenergy.psegliny.com/Dashboard" in url, timeout=20000)
+                await self.page.wait_for_url(lambda url: "mysmartenergy.nj.pseg.com/Dashboard" in url, timeout=20000)
             except Exception as e:
                 _LOGGER.warning(f"⚠️ URL wait failed: {e}, trying alternative approach...")
                 # Fallback: wait for any navigation to complete and check current URL
@@ -413,7 +414,7 @@ class PSEGAutoLogin:
                 
                 # Check if we're on the right page
                 current_url = self.page.url
-                if "mysmartenergy.psegliny.com/Dashboard" not in current_url:
+                if "mysmartenergy.nj.pseg.com/Dashboard" not in current_url:
                     _LOGGER.warning(f"⚠️ Not on expected dashboard, current URL: {current_url}")
                     # Try to navigate directly if we're not on the right page
                     await self.page.goto(self.final_dashboard, wait_until='domcontentloaded', timeout=20000)
@@ -431,7 +432,7 @@ class PSEGAutoLogin:
             # Get cookies from browser context
             context_cookies = await self.context.cookies()
             for cookie in context_cookies:
-                if cookie['domain'] in ['.psegliny.com', '.myaccount.psegliny.com', '.mysmartenergy.psegliny.com']:
+                if cookie['domain'] in ['.nj.pseg.com', '.myaccount.nj.pseg.com', '.mysmartenergy.nj.pseg.com']:
                     self.login_cookies[cookie['name']] = cookie['value']
                     _LOGGER.info(f"🍪 Context cookie: {cookie['name']} = {cookie['value'][:50]}...")
             

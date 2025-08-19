@@ -1,4 +1,4 @@
-"""The PSEG Long Island integration."""
+"""The PSEG integration."""
 from __future__ import annotations
 
 import logging
@@ -19,7 +19,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN, CONF_USERNAME, CONF_PASSWORD, CONF_COOKIE
-from .psegli import InvalidAuth, PSEGLIClient
+from .pseg import InvalidAuth, PSEGClient
 from .auto_login import get_fresh_cookies, check_addon_health
 
 _LOGGER = logging.getLogger(__name__)
@@ -101,11 +101,11 @@ async def get_last_cumulative_kwh(hass: HomeAssistant, statistic_id: str, before
         return 0.0
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
-    """Set up the PSEG Long Island component."""
+    """Set up the PSEG component."""
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up PSEG Long Island from a config entry."""
+    """Set up PSEG from a config entry."""
     hass.data.setdefault(DOMAIN, {})
     
     # Get credentials from config entry
@@ -150,7 +150,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 "create",
                 {
                     "title": "PSEG Integration: Cookie Required",
-                    "message": "No authentication cookie available. Please go to Settings > Integrations > PSEG Long Island > Configure to provide a valid cookie.",
+                    "message": "No authentication cookie available. Please go to Settings > Integrations > PSEG > Configure to provide a valid cookie.",
                     "notification_id": "psegli_cookie_required",
                 },
             )
@@ -158,7 +158,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
     
     # Create client with the available cookie
-    client = PSEGLIClient(cookie)
+    client = PSEGClient(cookie)
     hass.data[DOMAIN][entry.entry_id] = client
     
     # Test connection
@@ -429,7 +429,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 class PSEGCoordinator(DataUpdateCoordinator):
     """Handle fetching PSEG data and updating statistics (like Opower)."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, client: PSEGLIClient):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, client: PSEGClient):
         """Initialize the coordinator."""
         super().__init__(
             hass,
@@ -482,7 +482,7 @@ class PSEGCoordinator(DataUpdateCoordinator):
                     "create",
                     {
                         "title": "PSEG Integration: Authentication Failed",
-                        "message": f"Your PSEG cookie has expired. Please go to Settings > Integrations > PSEG Long Island > Configure to update your cookie.\n\nError: {e}",
+                        "message": f"Your PSEG cookie has expired. Please go to Settings > Integrations > PSEG > Configure to update your cookie.\n\nError: {e}",
                         "notification_id": "psegli_auth_failed",
                     },
                 )
@@ -772,7 +772,7 @@ async def _process_chart_data(hass: HomeAssistant, chart_data: dict[str, Any]) -
 
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Update options for PSEG Long Island."""
+    """Update options for PSEG."""
     # Reload the config entry when options change (when user updates cookie)
     await hass.config_entries.async_reload(entry.entry_id)
 

@@ -1,7 +1,7 @@
 {
   "domain": "pseg",
   "name": "PSEG",
-  "documentation": "https://github.com/daswass/ha-psegli",
+  "documentation": "https://github.com/jlbaez/ha-pseg",
   "dependencies": [],
   "codeowners": ["@daswass"],
   "requirements": ["requests>=2.31.0", "beautifulsoup4>=4.9.0"],

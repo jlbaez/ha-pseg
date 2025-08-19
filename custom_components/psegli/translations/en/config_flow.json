@@ -1,8 +1,8 @@
 {
   "step": {
     "user": {
-      "title": "PSEG Long Island",
-      "description": "Enter your PSEG Long Island credentials. The integration will automatically log in and obtain authentication cookies.",
+      "title": "PSEG",
+      "description": "Enter your PSEG credentials. The integration will automatically log in and obtain authentication cookies.",
       "data": {
         "username": "Username/Email",
         "password": "Password"

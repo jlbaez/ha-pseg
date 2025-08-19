@@ -1,11 +1,11 @@
-# PSEG Long Island Integration Installation Guide
+# PSEG Integration Installation Guide
 
-This guide will walk you through installing and configuring the PSEG Long Island integration for Home Assistant.
+This guide will walk you through installing and configuring the PSEG integration for Home Assistant.
 
 ## Prerequisites
 
 - Home Assistant (Core, OS, or Supervised)
-- PSEG Long Island account with Smart Energy enabled
+- PSEG  account with Smart Energy enabled
 - Access to your Home Assistant configuration directory
 
 ## Installation Methods
@@ -27,14 +27,14 @@ This guide will walk you through installing and configuring the PSEG Long Island
 
 3. **Install Integration**
 
-   - Find "PSEG Long Island" in the HACS Integrations list
+   - Find "PSEG" in the HACS Integrations list
    - Click **Download**
    - Restart Home Assistant
 
 4. **Configure Integration**
    - Go to **Settings** > **Devices & Services** > **Integrations**
    - Click **+ Add Integration**
-   - Search for "PSEG Long Island" and select it
+   - Search for "PSEG" and select it
    - Follow the configuration wizard
 
 ### Method 2: Manual Installation
@@ -59,7 +59,7 @@ This guide will walk you through installing and configuring the PSEG Long Island
 4. **Configure Integration**
    - Go to **Settings** > **Devices & Services** > **Integrations**
    - Click **+ Add Integration**
-   - Search for "PSEG Long Island" and select it
+   - Search for "PSEG" and select it
    - Follow the configuration wizard
 
 ## Configuration
@@ -70,12 +70,12 @@ This guide will walk you through installing and configuring the PSEG Long Island
 
    - Navigate to **Settings** > **Devices & Services** > **Integrations**
    - Click **+ Add Integration**
-   - Search for "PSEG Long Island"
+   - Search for "PSEG"
 
 2. **Enter Credentials**
 
-   - **Username**: Your PSEG Long Island account username/email
-   - **Password**: Your PSEG Long Island account password
+   - **Username**: Your PSEG account username/email
+   - **Password**: Your PSEG account password
    - **Cookie** (Optional): If you have a valid cookie, enter it directly. If left empty, the integration will attempt to get one from the automation addon if available.
 
 3. **Complete Setup**
@@ -87,28 +87,28 @@ This guide will walk you through installing and configuring the PSEG Long Island
 The integration stores your authentication cookie and uses it for all API requests. When cookies expire:
 
 1. **Automatic Refresh**: If the automation addon is available and healthy, the integration will automatically attempt to get a new cookie
-2. **Manual Update**: Update the cookie via **Settings** > **Devices & Services** > **PSEG Long Island** > **Configure**
+2. **Manual Update**: Update the cookie via **Settings** > **Devices & Services** > **PSEG** > **Configure**
 3. **Direct Input**: Manually obtain a cookie from your browser and enter it directly
 
 ### Options Flow
 
 To update your configuration:
 
-1. Go to **Settings** > **Devices & Services** > **PSEG Long Island**
+1. Go to **Settings** > **Devices & Services** > **PSEG**
 2. Click **Configure**
 3. **Update Cookie**: Enter a new cookie directly, or leave empty to attempt automatic refresh via addon
 4. Click **Submit**
 
 ## Automation Addon (Optional)
 
-The PSEG Long Island Automation Addon provides automatic cookie refresh capabilities:
+The PSEG Automation Addon provides automatic cookie refresh capabilities:
 
 ### Addon Installation
 
 1. **Install Addon**
 
    - Go to **Settings** > **Add-ons** > **Add-on Store**
-   - Add the PSEG Long Island Automation repository
+   - Add the PSEG Automation repository
    - Install the addon
 
 2. **Configure Addon**
@@ -126,7 +126,7 @@ The PSEG Long Island Automation Addon provides automatic cookie refresh capabili
 
 1. **Integration Status**
 
-   - Go to **Settings** > **Devices & Services** > **PSEG Long Island**
+   - Go to **Settings** > **Devices & Services** > **PSEG**
    - Status should show as "Configured"
 
 2. **Data Availability**

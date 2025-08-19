@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PSEG Long Island Automation Addon - FastAPI Server"""
+"""PSEG Automation Addon - FastAPI Server"""
 
 import asyncio
 import logging
@@ -15,7 +15,7 @@ from auto_login import get_fresh_cookies
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="PSEG Long Island Automation", version="1.0.0")
+app = FastAPI(title="PSEG Automation", version="1.0.0")
 
 class LoginRequest(BaseModel):
     username: str

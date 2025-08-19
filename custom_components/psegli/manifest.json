@@ -1,6 +1,6 @@
 {
-  "domain": "psegli",
-  "name": "PSEG Long Island",
+  "domain": "pseg",
+  "name": "PSEG",
   "documentation": "https://github.com/daswass/ha-psegli",
   "dependencies": [],
   "codeowners": ["@daswass"],

@@ -1,4 +1,4 @@
-"""Config flow for PSEG Long Island integration."""
+"""Config flow for PSEG integration."""
 import logging
 import voluptuous as vol
 
@@ -9,14 +9,14 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util.yaml import load_yaml
 
 from .const import DOMAIN, CONF_COOKIE, CONF_USERNAME, CONF_PASSWORD
-from .psegli import PSEGLIClient
+from .pseg import PSEGClient
 from .exceptions import InvalidAuth
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for PSEG Long Island."""
+class PSEGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for PSEG."""
 
     VERSION = 1
     has_options = True
@@ -25,7 +25,7 @@ class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Create the options flow."""
-        return PSEGLIOptionsFlow(config_entry)
+        return PSEGOptionsFlow(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, str] | None = None
@@ -60,7 +60,7 @@ class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 
                 # If we have a cookie, validate it
                 if cookie:
-                    client = PSEGLIClient(cookie)
+                    client = PSEGClient(cookie)
                     await client.test_connection()
                     _LOGGER.info("Cookie validation successful")
                 else:
@@ -68,7 +68,7 @@ class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 # Create the config entry
                 return self.async_create_entry(
-                    title="PSEG Long Island",
+                    title="PSEG",
                     data={
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
@@ -97,8 +97,8 @@ class PSEGLIConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         })
 
 
-class PSEGLIOptionsFlow(config_entries.OptionsFlow):
-    """PSEG Long Island options flow."""
+class PSEGOptionsFlow(config_entries.OptionsFlow):
+    """PSEG options flow."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
@@ -107,7 +107,7 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, str] | None = None
     ) -> FlowResult:
-        """Manage the options for PSEG Long Island."""
+        """Manage the options for PSEG."""
         errors = {}
 
         if user_input is not None:
@@ -119,7 +119,7 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                 
                 # If user provided a new cookie, validate it
                 if new_cookie:
-                    client = PSEGLIClient(new_cookie)
+                    client = PSEGClient(new_cookie)
                     await client.test_connection()
                     _LOGGER.info("New cookie validation successful")
                     
@@ -150,7 +150,7 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                             cookie_string = cookies
                             
                             # Validate the cookie
-                            client = PSEGLIClient(cookie_string)
+                            client = PSEGClient(cookie_string)
                             await client.test_connection()
                             
                             # Update the config entry

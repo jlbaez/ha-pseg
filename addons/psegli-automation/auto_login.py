@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PSEG Long Island Auto Login Addon
+PSEG Auto Login Addon
 Uses realistic browsing pattern to avoid detection and obtain authentication cookies.
 """
 
@@ -9,6 +9,7 @@ import logging
 import random
 import time
 from typing import Optional, Dict, Any, List
+DOMAIN = "nj.pseg"
 
 from playwright.async_api import async_playwright, Browser, Page, BrowserContext
 
@@ -20,7 +21,7 @@ logging.basicConfig(
 _LOGGER = logging.getLogger(__name__)
 
 class PSEGAutoLogin:
-    """PSEG Long Island automated login using realistic browsing pattern."""
+    """PSEG automated login using realistic browsing pattern."""
     
     def __init__(self, email: str, password: str):
         """Initialize PSEG auto login."""
@@ -36,13 +37,13 @@ class PSEGAutoLogin:
         
         # URLs for the realistic browsing flow
         self.brave_search_url = "https://search.brave.com/search?q=pseg+long+island&source=desktop"
-        self.pseg_main_url = "https://www.nj.pseg.com/"
-        self.login_page_url = "https://myaccount.nj.pseg.com/user/login"
-        self.id_domain = "https://id.myaccount.nj.pseg.com/"
-        self.dashboard_url = "https://myaccount.nj.pseg.com/dashboards"
-        self.exceptional_dashboard = "https://myaccount.nj.pseg.com/dashboards/exceptionaldashboard"
-        self.mysmartenergy_redirect = "https://myaccount.nj.pseg.com/LI/Header/RedirectMDMWidget"
-        self.final_dashboard = "https://mysmartenergy.nj.pseg.com/Dashboard"
+        self.pseg_main_url = f"https://www.{DOMAIN}.com/"
+        self.login_page_url = f"https://myaccount.{DOMAIN}.com/user/login"
+        self.id_domain = f"https://id.myaccount.{DOMAIN}.com/"
+        self.dashboard_url = f"https://myaccount.{DOMAIN}.com/dashboards"
+        self.exceptional_dashboard = f"https://myaccount.{DOMAIN}.com/dashboards/exceptionaldashboard"
+        self.mysmartenergy_redirect = f"https://myaccount.{DOMAIN}.com/LI/Header/RedirectMDMWidget"
+        self.final_dashboard = f"https://mysmartenergy.{DOMAIN}.com/Dashboard"
     
     async def setup_browser(self) -> bool:
         """Initialize Playwright browser with stealth options."""
@@ -566,7 +567,7 @@ async def main():
     """Test function for standalone usage."""
     import argparse
     
-    parser = argparse.ArgumentParser(description='PSEG Long Island Auto Login - Home Assistant Addon')
+    parser = argparse.ArgumentParser(description='PSEG Auto Login - Home Assistant Addon')
     parser.add_argument('--email', required=True, help='PSEG account email/username')
     parser.add_argument('--password', required=True, help='PSEG account password')
     

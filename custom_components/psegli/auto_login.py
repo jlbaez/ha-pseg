@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Automated login for PSEG Long Island using the automation addon."""
+"""Automated login for PSEG using the automation addon."""
 
 import asyncio
 import logging

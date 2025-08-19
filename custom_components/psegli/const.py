@@ -1,9 +1,9 @@
-"""Constants for the PSEG Long Island integration."""
+"""Constants for the PSEG integration."""
 
 DOMAIN = "nj.pseg"
 
 # Defaults
-DEFAULT_NAME = "PSEG Long Island"
+DEFAULT_NAME = "PSEG"
 DEFAULT_SCAN_INTERVAL = 300  # 5 minutes
 
 # Configuration

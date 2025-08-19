@@ -1,4 +1,4 @@
-"""Exceptions for the PSEG Long Island integration."""
+"""Exceptions for the PSEG integration."""
 
 from homeassistant.exceptions import HomeAssistantError
 
@@ -8,4 +8,4 @@ class InvalidAuth(HomeAssistantError):
 
 
 class PSEGLIError(HomeAssistantError):
-    """Base exception for PSEG Long Island integration.""" 
+    """Base exception for PSEG integration.""" 

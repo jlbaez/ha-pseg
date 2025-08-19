@@ -1,4 +1,4 @@
-"""PSEG Long Island client."""
+"""PSEG client."""
 import json
 import logging
 from datetime import datetime, timezone, timedelta
@@ -9,15 +9,14 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 from bs4 import BeautifulSoup
 
-from .const import ATTR_COMPARISON, ATTR_DESCRIPTION, ATTR_LAST_UPDATE
+from .const import ATTR_COMPARISON, ATTR_DESCRIPTION, ATTR_LAST_UPDATE, DOMAIN
 from .exceptions import InvalidAuth
-from const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class PSEGLIClient:
-    """PSEG Long Island API client."""
+    """PSEG API client."""
 
     def __init__(self, cookie: str) -> None:
         """Initialize the client."""

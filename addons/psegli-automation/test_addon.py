@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test script for PSEG Long Island Automation Addon"""
+"""Test script for PSEG Automation Addon"""
 
 import asyncio
 import aiohttp
@@ -9,7 +9,7 @@ async def test_addon():
     """Test the addon endpoints."""
     base_url = "http://localhost:8000"
     
-    print("🧪 Testing PSEG Long Island Automation Addon...")
+    print("🧪 Testing PSEG Automation Addon...")
     
     async with aiohttp.ClientSession() as session:
         # Test health endpoint

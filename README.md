@@ -1,4 +1,4 @@
-# PSEG Long Island Home Assistant Integration
+# PSEG NJ Home Assistant Integration
 
 A Home Assistant integration for PSEG NJ that provides automated energy usage data collection and statistics updates using a dedicated automation addon.
 
@@ -31,7 +31,7 @@ This integration uses a **two-component approach**:
 
    - Go to **Settings** → **Add-ons** → **Add-on Store**
    - Click the three dots menu (⋮) → **Repositories**
-   - Add: `https://github.com/daswass/ha-psegli`
+   - Add: `https://github.com/jlbaez/ha-psegnj`
    - Click **Add**
 
 2. **Install the addon:**

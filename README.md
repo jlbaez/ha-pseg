@@ -31,7 +31,7 @@ This integration uses a **two-component approach**:
 
    - Go to **Settings** → **Add-ons** → **Add-on Store**
    - Click the three dots menu (⋮) → **Repositories**
-   - Add: `https://github.com/jlbaez/ha-psegnj`
+   - Add: `https://github.com/jlbaez/ha-pseg`
    - Click **Add**
 
 2. **Install the addon:**
@@ -51,7 +51,7 @@ This integration uses a **two-component approach**:
 
    ```bash
    # From your HA system
-   cp -r custom_components/psegli /config/custom_components/
+   cp -r custom_components/pseg /config/custom_components/
    ```
 
 2. **Restart Home Assistant**
@@ -154,7 +154,7 @@ The integration provides:
 ### **Manual Refresh**
 
 ```yaml
-service: psegli.update_statistics
+service: pseg.update_statistics
 ```
 
 ### **Addon API Endpoints**
@@ -219,4 +219,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Note**: This integration requires the PSEG Long Island Automation Addon to function. The addon handles all browser automation and reCAPTCHA challenges automatically, making the integration much more user-friendly than previous versions.
+**Note**: This integration requires the PSEG Long Island Automation Addon to function. The addon handles all browser automation and reCAPTCHA challenges automatically, making the integration much more user-friendly than previous versions.:

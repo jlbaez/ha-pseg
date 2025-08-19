@@ -15,7 +15,7 @@ from .exceptions import InvalidAuth
 _LOGGER = logging.getLogger(__name__)
 
 
-class PSEGLIClient:
+class PSEGClient:
     """PSEG API client."""
 
     def __init__(self, cookie: str) -> None:

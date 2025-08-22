@@ -1,13 +1,13 @@
-# PSEG NJ Home Assistant Integration
+# PSEG Home Assistant Integration
 
-A Home Assistant integration for PSEG NJ that provides automated energy usage data collection and statistics updates using a dedicated automation addon.
+A Home Assistant integration for PSEG that provides automated energy usage data collection and statistics updates using a dedicated automation addon.
 
 ## 🚀 **Architecture Overview**
 
 This integration uses a **two-component approach**:
 
-1. **PSEG NJ Automation Addon**: Handles automated login, reCAPTCHA bypass, and cookie management
-2. **PSEG NJ Integration**: Lightweight component that fetches energy data using the addon's authentication
+1. **PSEG Automation Addon**: Handles automated login, reCAPTCHA bypass, and cookie management
+2. **PSEG Integration**: Lightweight component that fetches energy data using the addon's authentication
 
 ### **How It Works:**
 
@@ -20,7 +20,7 @@ This integration uses a **two-component approach**:
 ## 📋 **Prerequisites**
 
 - Home Assistant OS, Core, or Supervised installation
-- PSEG Long Island account credentials (username/email and password)
+- PSEG account credentials (username/email and password)
 - Internet access for PSEG API calls
 
 ## 🔧 **Installation**
@@ -36,7 +36,7 @@ This integration uses a **two-component approach**:
 
 2. **Install the addon:**
 
-   - Find **PSEG NJ Automation** in the store
+   - Find **PSEG Automation** in the store
    - Click **Install**
    - Wait for installation to complete
    - Click **Start**
@@ -59,7 +59,7 @@ This integration uses a **two-component approach**:
 3. **Add the integration:**
    - Go to **Settings** → **Devices & Services**
    - Click **Add Integration**
-   - Search for **PSEG Long Island**
+   - Search for **PSEG**
    - Enter your PSEG username/email and password
    - Click **Submit**
 
@@ -219,4 +219,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Note**: This integration requires the PSEG Long Island Automation Addon to function. The addon handles all browser automation and reCAPTCHA challenges automatically, making the integration much more user-friendly than previous versions.:
+**Note**: This integration requires the PSEG Automation Addon to function. The addon handles all browser automation and reCAPTCHA challenges automatically, making the integration much more user-friendly than previous versions.:

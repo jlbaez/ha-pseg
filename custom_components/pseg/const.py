@@ -1,6 +1,6 @@
 """Constants for the PSEG integration."""
 
-DOMAIN = "nj.pseg"
+DOMAIN = "pseg"
 
 # Defaults
 DEFAULT_NAME = "PSEG"
@@ -8,6 +8,7 @@ DEFAULT_SCAN_INTERVAL = 300  # 5 minutes
 
 # Configuration
 CONF_COOKIE = "cookie"
+CONF_URL_ROOT = "url_root"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
 

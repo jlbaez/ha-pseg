@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 from bs4 import BeautifulSoup
 
-from .const import ATTR_COMPARISON, ATTR_DESCRIPTION, ATTR_LAST_UPDATE, DOMAIN
+from .const import ATTR_COMPARISON, ATTR_DESCRIPTION, ATTR_LAST_UPDATE
 from .exceptions import InvalidAuth
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,13 +18,14 @@ _LOGGER = logging.getLogger(__name__)
 class PSEGClient:
     """PSEG API client."""
 
-    def __init__(self, cookie: str) -> None:
+    def __init__(self, url_root: str, cookie: str) -> None:
         """Initialize the client."""
         self.cookie = cookie
         self.session = requests.Session()
+        self.url_root = url_root
         self.session.headers.update({
             "Cookie": cookie,
-            "Referer": f"https://mysmartenergy.{DOMAIN}.com/Dashboard",
+            "Referer": f"https://mysmartenergy.{self.url_root}.com/Dashboard",
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -48,7 +49,7 @@ class PSEGClient:
     def _test_connection_sync(self) -> bool:
         """Test the connection to PSEG (synchronous)."""
         try:
-            response = self.session.get(f"https://mysmartenergy.{DOMAIN}.com/Dashboard")
+            response = self.session.get(f"https://mysmartenergy.{self.url_root}.com/Dashboard")
             response.raise_for_status()
             
             # Check if we're redirected to login page
@@ -75,7 +76,7 @@ class PSEGClient:
     def _get_dashboard_page(self) -> tuple[str, str]:
         """Get the Dashboard page and extract RequestVerificationToken."""
         _LOGGER.info("Getting RequestVerificationToken from Dashboard page...")
-        dashboard_response = self.session.get(f"https://mysmartenergy.{DOMAIN}.com/Dashboard")
+        dashboard_response = self.session.get(f"https://mysmartenergy.{self.url_root}.com/Dashboard")
         if dashboard_response.status_code != 200:
             raise InvalidAuth("Failed to get Dashboard page")
         
@@ -88,12 +89,12 @@ class PSEGClient:
         else:
             _LOGGER.error("Could not find RequestVerificationToken on /Dashboard")
             raise InvalidAuth("Could not find RequestVerificationToken on /Dashboard")
-        
+        /
         return dashboard_response.text, request_token
 
     def _setup_chart_context(self, request_token: str, start_date: datetime, end_date: datetime) -> None:
         """Set up the Chart context with hourly granularity."""
-        chart_setup_url = f"https://mysmartenergy.{DOMAIN}.com/Dashboard/Chart"
+        chart_setup_url = f"https://mysmartenergy.{self.url_root}.com/Dashboard/Chart"
         chart_setup_data = {
             "__RequestVerificationToken": request_token,
             "UsageInterval": "5",  # 5 = Hourly granularity
@@ -133,7 +134,7 @@ class PSEGClient:
 
     def _get_chart_data(self) -> dict[str, Any]:
         """Get the actual chart data from PSEG."""
-        chart_data_url = f"https://mysmartenergy.{DOMAIN}.com/Dashboard/ChartData"
+        chart_data_url = f"https://mysmartenergy.{self.url_root}.com/Dashboard/ChartData"
         chart_data_params = {
             "_": int(datetime.now().timestamp() * 1000)  # Cache buster
         }

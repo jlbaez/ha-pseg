@@ -8,7 +8,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util.yaml import load_yaml
 
-from .const import DOMAIN, CONF_COOKIE, CONF_USERNAME, CONF_PASSWORD
+from .const import CONF_URL_ROOT, DOMAIN, CONF_COOKIE, CONF_USERNAME, CONF_PASSWORD
 from .pseg import PSEGClient
 from .exceptions import InvalidAuth
 
@@ -38,6 +38,7 @@ class PSEGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Get credentials from user input
                 username = user_input[CONF_USERNAME]
                 password = user_input[CONF_PASSWORD]
+                url_root = user_input[CONF_URL_ROOT]
                 cookie = user_input.get(CONF_COOKIE, "")
                 
                 # If no cookie provided, try to get one from the addon
@@ -60,7 +61,7 @@ class PSEGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 
                 # If we have a cookie, validate it
                 if cookie:
-                    client = PSEGClient(cookie)
+                    client = PSEGClient(url_root, cookie)
                     await client.test_connection()
                     _LOGGER.info("Cookie validation successful")
                 else:

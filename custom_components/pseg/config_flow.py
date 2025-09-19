@@ -73,6 +73,7 @@ class PSEGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data={
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
+                        CONF_URL_ROOT: url_root,
                         CONF_COOKIE: cookie,
                     },
                 )
@@ -94,6 +95,7 @@ class PSEGConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return vol.Schema({
             vol.Required(CONF_USERNAME): str,
             vol.Required(CONF_PASSWORD): str,
+            vol.Required(CONF_URL_ROOT): str,
             vol.Optional(CONF_COOKIE): str,
         })
 
@@ -116,11 +118,12 @@ class PSEGOptionsFlow(config_entries.OptionsFlow):
                 # Get credentials from config entry
                 username = self.config_entry.data.get(CONF_USERNAME)
                 password = self.config_entry.data.get(CONF_PASSWORD)
+                url_root = self.config_entry.data.get(CONF_URL_ROOT)
                 new_cookie = user_input.get(CONF_COOKIE, "")
                 
                 # If user provided a new cookie, validate it
                 if new_cookie:
-                    client = PSEGClient(new_cookie)
+                    client = PSEGClient(url_root, new_cookie)
                     await client.test_connection()
                     _LOGGER.info("New cookie validation successful")
                     
@@ -151,7 +154,7 @@ class PSEGOptionsFlow(config_entries.OptionsFlow):
                             cookie_string = cookies
                             
                             # Validate the cookie
-                            client = PSEGClient(cookie_string)
+                            client = PSEGClient(url_root, cookie_string)
                             await client.test_connection()
                             
                             # Update the config entry
@@ -195,6 +198,7 @@ class PSEGOptionsFlow(config_entries.OptionsFlow):
     def _get_options_schema(self):
         """Return the schema for the options flow."""
         return vol.Schema({
+            vol.Optional(CONF_URL_ROOT): str,
             vol.Optional(CONF_COOKIE, description="Leave empty to attempt automatic refresh via addon"): str,
         })
 

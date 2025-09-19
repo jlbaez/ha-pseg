@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, CONF_USERNAME, CONF_PASSWORD, CONF_COOKIE
+from .const import DOMAIN, CONF_URL_ROOT, CONF_USERNAME, CONF_PASSWORD, CONF_COOKIE
 from .pseg import InvalidAuth, PSEGClient
 from .auto_login import get_fresh_cookies, check_addon_health
 
@@ -111,6 +111,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Get credentials from config entry
     username = entry.data.get(CONF_USERNAME)
     password = entry.data.get(CONF_PASSWORD)
+    url_root = entry.data.get(CONF_URL_ROOT)
     cookie = entry.data.get(CONF_COOKIE, "")
     
     if not username or not password:
@@ -158,7 +159,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return False
     
     # Create client with the available cookie
-    client = PSEGClient(cookie)
+    client = PSEGClient(url_root, cookie)
     hass.data[DOMAIN][entry.entry_id] = client
     
     # Test connection

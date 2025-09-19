@@ -89,7 +89,6 @@ class PSEGClient:
         else:
             _LOGGER.error("Could not find RequestVerificationToken on /Dashboard")
             raise InvalidAuth("Could not find RequestVerificationToken on /Dashboard")
-        /
         return dashboard_response.text, request_token
 
     def _setup_chart_context(self, request_token: str, start_date: datetime, end_date: datetime) -> None:
